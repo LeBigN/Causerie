@@ -3,12 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
-<title>Causerie Sécurité — Démarrage de chantier</title>
-<link rel="manifest" href="manifest.json">
+<title>Causerie</title>
+<link rel="manifest" href="manifest.json?v=2">
 <meta name="theme-color" content="#C8102E">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Causerie Sécu">
-<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-title" content="Causerie">
+<meta name="application-name" content="Causerie">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=2">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=2">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=2">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=2">
+<link rel="apple-touch-icon-precomposed" href="apple-touch-icon.png?v=2">
 <script src="vendor/jspdf.umd.min.js"></script>
 <style>
 :root{
@@ -122,6 +129,23 @@ input:focus, textarea:focus, select:focus{ outline:2px solid rgba(200,16,46,.35)
 .sig-clear{margin-top:6px; background:#EEF0F3; color:var(--red-dark); border:none; border-radius:8px; padding:7px 10px; font-size:12px; font-weight:600; display:inline-flex; align-items:center; gap:6px;}
 
 /* Rappel */
+.photo-actions{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px;}
+.photo-actions button{
+  height:48px; border-radius:11px; font-size:14px; font-weight:700; display:flex; align-items:center; justify-content:center; gap:8px;
+}
+.btn-cam{background:var(--red-tint); color:var(--red-dark); border:1.5px dashed #E8B5BC;}
+.btn-gal{background:#F1F3F6; color:#4A5568; border:1.5px dashed #CBD2DB;}
+.photo-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(140px, 1fr)); gap:10px;}
+.photo-item{border:1px solid var(--line); border-radius:10px; overflow:hidden; background:#fff;}
+.photo-item .ph{position:relative; aspect-ratio:4/3; background:#F1F3F6;}
+.photo-item img{width:100%; height:100%; object-fit:cover; display:block;}
+.photo-item .rm{
+  position:absolute; top:6px; right:6px; width:30px; height:30px; border-radius:8px; border:none; padding:0;
+  background:rgba(17,24,39,.6); color:#fff; display:flex; align-items:center; justify-content:center;
+}
+.photo-item input{width:100%; border:none; border-top:1px solid var(--line); padding:8px 9px; font-size:13px; background:#fff; color:var(--ink);}
+.photo-item input:focus{outline:none; background:#FFFBFB;}
+.photo-empty{font-size:12.5px; color:var(--sub); text-align:center; padding:6px 0 2px;}
 .rappel{
   background:var(--red-tint); border:1px solid #E8B5BC; border-radius:14px; padding:12px 14px; margin-bottom:14px;
   display:flex; gap:10px; align-items:flex-start; font-size:13px; line-height:1.45; color:var(--ink);
@@ -189,7 +213,7 @@ footer.legal-footer{
     </div>
     <div style="text-align:right;">
       <div class="title" id="titleWithIcon">CAUSERIE SÉCURITÉ</div>
-      <div class="agence">LOXAM MODULE · Démarrage de chantier</div>
+      <div class="agence">LOXAM MODULE</div>
     </div>
   </div>
   <div class="progress-wrap">
@@ -202,11 +226,12 @@ footer.legal-footer{
 
 <div class="sticky-footer">
   <button class="btn btn-danger-ghost" id="resetBtn" title="Nouvelle fiche" aria-label="Nouvelle fiche"></button>
-  <button class="btn btn-ghost" id="saveBtn" title="Enregistrer" aria-label="Enregistrer"></button>
   <button class="btn btn-primary" id="pdfBtn"></button>
 </div>
 
 <div id="toast" class="toast" role="status"></div>
+<input type="file" id="fileCam" accept="image/*" capture="environment" style="display:none">
+<input type="file" id="fileGal" accept="image/*" multiple style="display:none">
 
 <div class="modal-bg" id="checkModal">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="checkTitle">
@@ -221,7 +246,7 @@ footer.legal-footer{
 </div>
 
 <script>
-const APP_VERSION = 'v1';
+const APP_VERSION = 'v3';
 
 /* ---------- ICÔNES SVG (style Lucide, minimalistes, currentColor) ---------- */
 function icon(name, size){
@@ -240,6 +265,8 @@ function icon(name, size){
     userPlus:'<path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/>',
     alert:   '<path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
     edit:    '<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>',
+    camera:  '<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>',
+    image:   '<rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>',
     pen:     '<path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/>'
   };
   const sz = size || 18;
@@ -280,7 +307,7 @@ function iconNode(name, size){
 
 /* ---------- CONTENU OFFICIEL DE LA FICHE ---------- */
 const DOC_TITLE = 'FICHE DE CAUSERIE SÉCURITÉ';
-const DOC_SUB   = 'DÉMARRAGE DE CHANTIER – LOXAM MODULE';
+const DOC_SUB   = 'LOXAM MODULE';
 
 const CONSIGNES = [
   { lead:'Port obligatoire des EPI : ', rest:'chaussures de sécurité, casque, gilet haute visibilité et protections adaptées aux tâches (gants, lunettes, protections auditives).' },
@@ -295,24 +322,54 @@ const RAPPEL_TEXT = 'chaque intervenant doit respecter le PPSPS, les consignes d
 const LEGAL = 'LOXAM MODULE – S.A.S.U. CAPITAL DE 487 500 € – SIÈGE SOCIAL : 276, RUE NICOLAS COATANLEM – 56850 CAUDAN – R.C.S. LORIENT B 433 911 948 – N° T.V.A : FR27 433 911 948 – NAF 7732Z';
 
 const FONCTIONS = ['Conducteur de travaux','Chef de chantier','Chef d’équipe','Chargé d’affaires','Responsable QSE'];
-const ENTREPRISES = ['LOXAM Module','CRPS','TCPP','TERMICLIM','CC BAT','EMS','JM CARTIER'];
+const CONDUCTEURS = ['SCOTTO Nicolas','LAOUAR Hilel'];
+const SOUS_TRAITANTS = ['CRPS','TCPP','TERMICLIM','CC BAT','EMS','JM CARTIER'];
+const ENTREPRISES = ['LOXAM Module', ...SOUS_TRAITANTS];   // + « Intérim » et « Autre… » (saisie libre)
+const AUTRE = '__autre__', INTERIM = '__interim__';
+
+/* Menu déroulant (même principe que Loxcheck) */
+function selectField(label, options, value, onchange, extra){
+  const sel = el('select',{onchange:(e)=>onchange(e.target.value)});
+  sel.append(el('option',{value:''},'— Sélectionner —'));
+  options.forEach(o=>{
+    const opt = el('option',{value:o.v}, o.t);
+    if(o.v === value) opt.selected = true;
+    sel.append(opt);
+  });
+  const f = el('div',{class:'field'}, el('label', label), sel);
+  if(extra) f.append(extra);
+  return f;
+}
+function entrepriseOptions(){
+  return [...ENTREPRISES.map(v=>({v, t:v})), {v:INTERIM, t:'Intérim (préciser l’agence)'}, {v:AUTRE, t:'Autre…'}];
+}
+function resolveEntreprise(choice, precise){
+  if(choice === AUTRE) return (precise||'').trim();
+  if(choice === INTERIM) return (precise||'').trim() ? 'Intérim ' + precise.trim() : 'Intérim';
+  return choice || '';
+}
 
 const STORAGE_KEY   = 'causerie_secu_draft_v1';
 const HISTO_KEY     = 'causerie_secu_histo_v1';   // chantiers / animateurs / entreprises récents
 
 function newParticipant(){
-  return { id: Date.now().toString(36) + Math.random().toString(36).slice(2,6), nom:'', entreprise:'', sig:'' };
+  const base = { id: Date.now().toString(36) + Math.random().toString(36).slice(2,6), nom:'', ent_choice:'', ent_precise:'', entreprise:'', sig:'' };
+  // Un nouvel intervenant reprend par défaut l'entreprise de la fiche (modifiable)
+  try{ if(state && state.meta && state.meta.ent_choice){ base.ent_choice = state.meta.ent_choice; base.ent_precise = state.meta.ent_precise; base.entreprise = state.meta.entreprise; } }catch(e){}
+  return base;
 }
 function initialState(){
   return {
-    meta:{ chantier:'', date:'', anim_nom:'', anim_fonction:'' },
+    meta:{ chantier:'', date:'', ent_choice:'', ent_precise:'', entreprise:'', anim_choice:'', anim_nom:'', anim_fonction:'' },
     consignes:{},          // index -> true (aucune case cochée par défaut)
     remarques:'',
-    participants:[ newParticipant() ],
+    photos:[],             // [{id, src (JPEG compressé), w, h, legende}]
+    participants:[],
     animSig:''
   };
 }
 let state = initialState();
+state.participants.push(newParticipant());
 
 /* ---------- HISTORIQUE (datalists) ---------- */
 function loadHisto(){
@@ -335,7 +392,6 @@ function datalist(id, values){
 }
 
 /* ---------- RENDU ---------- */
-document.getElementById('titleWithIcon').innerHTML = icon('hardhat',15) + '<span>CAUSERIE SÉCURITÉ</span>';
 
 function renderInfoSection(){
   const h = loadHisto();
@@ -354,16 +410,34 @@ function renderInfoSection(){
     el('label',{for:'f_date'},'Date'),
     el('input',{type:'date', id:'f_date', value:state.meta.date, oninput:(e)=>state.meta.date=e.target.value})));
 
+  // Entreprise concernée (sert aussi au nom du PDF)
+  const m = state.meta;
+  const entPrecise = (m.ent_choice === AUTRE || m.ent_choice === INTERIM)
+    ? el('input',{type:'text', style:'margin-top:8px', placeholder: m.ent_choice===INTERIM ? 'Nom de l’agence d’intérim' : 'Nom de l’entreprise', autocomplete:'off',
+        value:m.ent_precise, oninput:(e)=>{ m.ent_precise=e.target.value; m.entreprise=resolveEntreprise(m.ent_choice, m.ent_precise); }})
+    : null;
+  c.append(selectField('Entreprise / Sous-traitant', entrepriseOptions(), m.ent_choice, (v)=>{
+    m.ent_choice = v; m.entreprise = resolveEntreprise(v, m.ent_precise);
+    // Propage aux intervenants encore vierges
+    state.participants.forEach(p=>{ if(!p.nom.trim() && !p.sig){ p.ent_choice=v; p.ent_precise=m.ent_precise; p.entreprise=m.entreprise; } });
+    renderAll(); saveDraft(true);
+  }, entPrecise));
+
   const g = el('div',{class:'grid2 stack-sm'});
+  const animAutre = m.anim_choice === AUTRE
+    ? el('input',{type:'text', style:'margin-top:8px', placeholder:'Prénom NOM', autocomplete:'off',
+        value:m.anim_nom, oninput:(e)=>{ m.anim_nom=e.target.value; updateProgress(); }})
+    : null;
+  g.append(selectField('Animateur (conducteur de travaux)', [...CONDUCTEURS.map(v=>({v, t:v})), {v:AUTRE, t:'Autre…'}], m.anim_choice, (v)=>{
+    m.anim_choice = v;
+    m.anim_nom = (v === AUTRE || !v) ? '' : v;
+    if(CONDUCTEURS.includes(v)) m.anim_fonction = 'Conducteur de travaux';
+    renderAll(); saveDraft(true);
+  }, animAutre));
   g.append(el('div',{class:'field'},
-    el('label',{for:'f_anim'},'Animateur — Nom'),
-    el('input',{type:'text', id:'f_anim', list:'dl_anim', placeholder:'Prénom NOM', autocomplete:'off',
-      value:state.meta.anim_nom, oninput:(e)=>{ state.meta.anim_nom=e.target.value; updateProgress(); }}),
-    datalist('dl_anim', h.animateurs)));
-  g.append(el('div',{class:'field'},
-    el('label',{for:'f_fonction'},'Animateur — Fonction'),
+    el('label',{for:'f_fonction'},'Fonction'),
     el('input',{type:'text', id:'f_fonction', list:'dl_fonctions', placeholder:'Ex : Conducteur de travaux', autocomplete:'off',
-      value:state.meta.anim_fonction, oninput:(e)=>state.meta.anim_fonction=e.target.value}),
+      value:m.anim_fonction, oninput:(e)=>m.anim_fonction=e.target.value}),
     datalist('dl_fonctions', FONCTIONS)));
   c.append(g);
   return c;
@@ -388,6 +462,87 @@ function renderConsignesSection(){
     }}, txt, box);
     c.append(el('div',{class:'item'}, row));
   });
+  return c;
+}
+
+/* ---------- PHOTOS ---------- */
+const fileCam = document.getElementById('fileCam');
+const fileGal = document.getElementById('fileGal');
+fileCam.addEventListener('change', e=>{ addPhotos(e.target.files); e.target.value=''; });
+fileGal.addEventListener('change', e=>{ addPhotos(e.target.files); e.target.value=''; });
+
+/* Redimensionne (1600 px max) et compresse en JPEG pour garder un brouillon
+   et un PDF légers. createImageBitmap respecte l'orientation EXIF. */
+async function compressImage(file){
+  const MAX = 1600;
+  let srcImg, w, h;
+  try{
+    srcImg = await createImageBitmap(file, {imageOrientation:'from-image'});
+    w = srcImg.width; h = srcImg.height;
+  }catch(e){
+    const url = URL.createObjectURL(file);
+    srcImg = await new Promise((res, rej)=>{ const im = new Image(); im.onload=()=>res(im); im.onerror=rej; im.src=url; });
+    w = srcImg.naturalWidth; h = srcImg.naturalHeight;
+    setTimeout(()=>URL.revokeObjectURL(url), 1000);
+  }
+  const k = Math.min(1, MAX/Math.max(w,h));
+  const cw = Math.round(w*k), ch = Math.round(h*k);
+  const c = document.createElement('canvas');
+  c.width = cw; c.height = ch;
+  const x = c.getContext('2d');
+  x.fillStyle = '#fff'; x.fillRect(0,0,cw,ch);
+  x.drawImage(srcImg, 0, 0, cw, ch);
+  if(srcImg.close) srcImg.close();
+  return { src: c.toDataURL('image/jpeg', 0.72), w: cw, h: ch };
+}
+async function addPhotos(files){
+  const list = Array.from(files || []).filter(f=>/^image\//.test(f.type) || /\.(jpe?g|png|heic|heif|webp)$/i.test(f.name));
+  if(!list.length) return;
+  showToast(list.length > 1 ? 'Ajout de ' + list.length + ' photos…' : 'Ajout de la photo…');
+  let ok = 0;
+  for(const f of list){
+    try{
+      const im = await compressImage(f);
+      state.photos.push({ id: Date.now().toString(36)+Math.random().toString(36).slice(2,6), src:im.src, w:im.w, h:im.h, legende:'' });
+      ok++;
+    }catch(e){}
+  }
+  renderAll();
+  const saved = saveDraft(true);
+  if(!ok) showToast('Format de photo non pris en charge');
+  else if(!saved) showToast('Photo ajoutée (mémoire pleine : brouillon non sauvegardé)');
+  else showToast(ok > 1 ? ok + ' photos ajoutées' : 'Photo ajoutée');
+}
+function removePhoto(id){
+  if(!confirm('Supprimer cette photo ?')) return;
+  state.photos = state.photos.filter(x=>x.id!==id);
+  renderAll();
+  saveDraft(true);
+}
+function renderPhotosSection(){
+  const c = el('section',{class:'card', id:'sec-photos'});
+  c.append(el('h2', iconNode('camera',16), el('span','Photos'),
+    el('span',{class:'chapter-progress'}, String(state.photos.length))));
+  c.append(el('p',{class:'hint'}, 'Affichage, balisage, base vie, points signalés… Les photos sont jointes en annexe du PDF.'));
+  const cam = el('button',{type:'button', class:'btn-cam', onclick:()=>fileCam.click()});
+  cam.innerHTML = icon('camera',18) + '<span>Prendre</span>';
+  const gal = el('button',{type:'button', class:'btn-gal', onclick:()=>fileGal.click()});
+  gal.innerHTML = icon('image',18) + '<span>Importer</span>';
+  c.append(el('div',{class:'photo-actions'}, cam, gal));
+  if(!state.photos.length){
+    c.append(el('div',{class:'photo-empty'}, 'Aucune photo'));
+    return c;
+  }
+  const grid = el('div',{class:'photo-grid'});
+  state.photos.forEach((ph)=>{
+    const rm = el('button',{type:'button', class:'rm', 'aria-label':'Supprimer la photo', onclick:()=>removePhoto(ph.id)});
+    rm.innerHTML = icon('x',16);
+    grid.append(el('div',{class:'photo-item'},
+      el('div',{class:'ph'}, el('img',{src:ph.src, alt:ph.legende || 'Photo'}), rm),
+      el('input',{type:'text', placeholder:'Légende (facultatif)', value:ph.legende||'', oninput:(e)=>ph.legende=e.target.value})
+    ));
+  });
+  c.append(grid);
   return c;
 }
 
@@ -438,7 +593,6 @@ function renderParticipantsSection(){
   c.append(el('h2', iconNode('users',16), el('span','3. Émargement des participants'),
     el('span',{class:'chapter-progress'}, signedCount+' signé'+(signedCount>1?'s':''))));
   c.append(el('p',{class:'attest'}, ATTESTATION));
-  c.append(datalist('dl_entreprises', [...ENTREPRISES, ...h.entreprises]));
 
   state.participants.forEach((p, idx)=>{
     const card = el('div',{class:'part'});
@@ -452,8 +606,14 @@ function renderParticipantsSection(){
     const g = el('div',{class:'grid2 stack-sm'});
     g.append(el('div',{class:'field'}, el('label','Nom & Prénom'),
       el('input',{type:'text', placeholder:'NOM Prénom', autocomplete:'off', value:p.nom, oninput:(e)=>{ p.nom=e.target.value; nameLbl.textContent = p.nom || 'Intervenant'; }})));
-    g.append(el('div',{class:'field'}, el('label','Entreprise / Intérim'),
-      el('input',{type:'text', list:'dl_entreprises', placeholder:'Société ou agence d’intérim', autocomplete:'off', value:p.entreprise, oninput:(e)=>p.entreprise=e.target.value})));
+    const pPrecise = (p.ent_choice === AUTRE || p.ent_choice === INTERIM)
+      ? el('input',{type:'text', style:'margin-top:8px', placeholder: p.ent_choice===INTERIM ? 'Nom de l’agence d’intérim' : 'Nom de l’entreprise', autocomplete:'off',
+          value:p.ent_precise, oninput:(e)=>{ p.ent_precise=e.target.value; p.entreprise=resolveEntreprise(p.ent_choice, p.ent_precise); }})
+      : null;
+    g.append(selectField('Entreprise / Intérim', entrepriseOptions(), p.ent_choice, (v)=>{
+      p.ent_choice = v; p.entreprise = resolveEntreprise(v, p.ent_precise);
+      renderAll(); saveDraft(true);
+    }, pPrecise));
     card.append(g);
     card.append(sigBlock('p_'+p.id, true));
     c.append(card);
@@ -469,7 +629,7 @@ function renderAnimSigSection(){
   const c = el('section',{class:'card', id:'sec-anim'});
   c.append(el('h2', iconNode('pen',16), el('span','Signature de l’animateur')));
   const who = [state.meta.anim_nom, state.meta.anim_fonction].filter(Boolean).join(' — ');
-  c.append(el('p',{class:'hint'}, who || 'Renseigner le nom et la fonction de l’animateur en haut de la fiche.'));
+  c.append(el('p',{class:'hint'}, who || 'Sélectionner l’animateur en haut de la fiche.'));
   c.append(sigBlock('anim', false));
   return c;
 }
@@ -589,11 +749,12 @@ function renderAll(){
   main.append(renderInfoSection());
   main.append(renderConsignesSection());
   main.append(renderRemarquesSection());
+  main.append(renderPhotosSection());
   main.append(renderParticipantsSection());
   main.append(renderAnimSigSection());
   main.append(renderRappel());
   const f = el('footer',{class:'legal-footer'}, LEGAL);
-  f.append(el('span',{class:'app-version'}, 'Causerie Sécurité ' + APP_VERSION));
+  f.append(el('span',{class:'app-version'}, 'Causerie ' + APP_VERSION));
   main.append(f);
   document.querySelectorAll('canvas[data-sig]').forEach(setupSig);
   window.scrollTo(0, scrollY);
@@ -645,8 +806,10 @@ function saveDraft(silent){
   try{
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     if(!silent) showToast('Brouillon enregistré');
+    return true;
   }catch(e){
     if(!silent) showToast("Erreur d'enregistrement");
+    return false;
   }
 }
 function loadDraft(){
@@ -659,11 +822,18 @@ function loadDraft(){
       meta: Object.assign(base.meta, d.meta||{}),
       consignes: d.consignes || {},
       remarques: d.remarques || '',
+      photos: Array.isArray(d.photos) ? d.photos : [],
       participants: Array.isArray(d.participants) && d.participants.length
-        ? d.participants.map(p=>Object.assign(newParticipant(), p))
-        : base.participants,
+        ? d.participants.map(p=>{
+            const q = Object.assign({ id: Math.random().toString(36).slice(2,10), nom:'', ent_choice:'', ent_precise:'', entreprise:'', sig:'' }, p);
+            if(!q.ent_choice && q.entreprise){ if(ENTREPRISES.includes(q.entreprise)) q.ent_choice = q.entreprise; else { q.ent_choice = AUTRE; q.ent_precise = q.entreprise; } }
+            return q;
+          })
+        : [],
       animSig: d.animSig || ''
     };
+    if(!state.participants.length) state.participants.push(newParticipant());
+    if(!state.meta.anim_choice && state.meta.anim_nom){ state.meta.anim_choice = CONDUCTEURS.includes(state.meta.anim_nom) ? state.meta.anim_nom : AUTRE; }
   }catch(e){}
 }
 function todayISO(){
@@ -680,6 +850,7 @@ function frDate(iso){
 function resetFiche(){
   if(!confirm('Commencer une nouvelle fiche ? La fiche en cours sera effacée.')) return;
   state = initialState();
+  state.participants.push(newParticipant());
   for(const k in sigUnlocked) delete sigUnlocked[k];
   applyDateParDefaut();
   try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
@@ -689,9 +860,7 @@ function resetFiche(){
 }
 
 document.getElementById('resetBtn').addEventListener('click', resetFiche);
-document.getElementById('saveBtn').addEventListener('click', ()=>saveDraft(false));
 document.getElementById('resetBtn').innerHTML = icon('trash',18);
-document.getElementById('saveBtn').innerHTML = icon('save',18);
 const PDF_LABEL = icon('file',16) + '<span>Générer le PDF officiel</span>';
 document.getElementById('pdfBtn').innerHTML = PDF_LABEL;
 
@@ -842,19 +1011,22 @@ async function generatePDF(){
 
   /* ---- Cartouche : Chantier / Date / Animateur ---- */
   const cols = [
-    {label:'CHANTIER / AFFAIRE', w:CW*0.42, val:[state.meta.chantier.trim() || ' ']},
-    {label:'DATE', w:CW*0.18, val:[frDate(state.meta.date) || '__ / __ / ____']},
-    {label:'ANIMATEUR (NOM / FONCTION)', w:CW*0.40, val:[state.meta.anim_nom.trim() || ' ', state.meta.anim_fonction.trim()]}
+    {label:'CHANTIER / AFFAIRE', w:CW*0.30, val:[state.meta.chantier.trim() || ' ']},
+    {label:'ENTREPRISE', w:CW*0.22, val:[state.meta.entreprise.trim() || ' ']},
+    {label:'DATE', w:CW*0.16, val:[frDate(state.meta.date) || '__ / __ / ____'], nowrap:true},
+    {label:'ANIMATEUR (NOM / FONCTION)', w:CW*0.32, val:[state.meta.anim_nom.trim() || ' ', state.meta.anim_fonction.trim()]}
   ];
   doc.setFont('helvetica','normal');
   const colLines = cols.map((c, i)=>{
-    doc.setFontSize(10.2);
+    doc.setFontSize(9.8);
     let out = [];
-    if(i === 2){
-      out = doc.splitTextToSize(c.val[0], c.w-22).slice(0,2).map(t=>({t, sub:false}));
-      if(c.val[1]) out = out.concat(doc.splitTextToSize(c.val[1], c.w-22).slice(0,2).map(t=>({t, sub:true})));
+    if(c.nowrap){
+      out = [{t:c.val[0], sub:false}];
+    } else if(i === 3){
+      out = doc.splitTextToSize(c.val[0], c.w-20).slice(0,2).map(t=>({t, sub:false}));
+      if(c.val[1]) out = out.concat(doc.splitTextToSize(c.val[1], c.w-20).slice(0,2).map(t=>({t, sub:true})));
     } else {
-      out = doc.splitTextToSize(c.val[0], c.w-22).slice(0,3).map(t=>({t, sub:false}));
+      out = doc.splitTextToSize(c.val[0], c.w-20).slice(0,3).map(t=>({t, sub:false}));
     }
     return out;
   });
@@ -864,13 +1036,13 @@ async function generatePDF(){
   let cx = M;
   cols.forEach((c, i)=>{
     if(i > 0){ doc.setDrawColor(232,181,188); doc.setLineWidth(0.7); doc.line(cx, y+8, cx, y+infoH-8); }
-    doc.setFont('helvetica','bold'); doc.setFontSize(7.6); setC(REDD);
-    doc.text(c.label, cx+11, y+15);
+    doc.setFont('helvetica','bold'); doc.setFontSize(7.2); setC(REDD);
+    doc.text(c.label, cx+10, y+15);
     colLines[i].forEach((ln, j)=>{
       doc.setFont('helvetica', ln.sub ? 'normal' : 'bold');
-      doc.setFontSize(ln.sub ? 9 : 10.2);
+      doc.setFontSize(ln.sub ? 8.6 : 9.8);
       setC(ln.sub ? SUB : INK);
-      doc.text(ln.t, cx+11, y+29 + j*12.5);
+      doc.text(ln.t, cx+10, y+29 + j*12.5);
     });
     cx += c.w;
   });
@@ -1021,6 +1193,41 @@ async function generatePDF(){
   drawLead(rapLines, RAPPEL_LEAD, M+12, y+13, 11.5, REDD, INK);
   y += rapH;
 
+  /* ---- Annexe photos (page(s) dédiée(s)) ---- */
+  if(state.photos.length){
+    y = newPage();
+    y = band('ANNEXE PHOTOS', y) + 12;
+    const gap = 16, colW = (CW - gap)/2, imgH = 170, capH = 28, cellH = imgH + capH + 12;
+    let count = 0, rowTop = y;
+    state.photos.forEach((ph, i)=>{
+      const col = count % 2;
+      if(col === 0 && rowTop + cellH > MAXY){ rowTop = newPage(); }
+      const px = M + col*(colW + gap), cy = rowTop;
+      doc.setFillColor(WARMF[0],WARMF[1],WARMF[2]); doc.setDrawColor(WARMB[0],WARMB[1],WARMB[2]); doc.setLineWidth(0.8);
+      doc.roundedRect(px, cy, colW, cellH, 5, 5, 'FD');
+      const aw = colW - 12, ah = imgH - 6;
+      const k = Math.min(aw/(ph.w||aw), ah/(ph.h||ah));
+      const iw = (ph.w||aw)*k, ih = (ph.h||ah)*k;
+      try{ doc.addImage(ph.src, 'JPEG', px + (colW-iw)/2, cy + 6 + (ah-ih)/2, iw, ih, 'ph'+i, 'FAST'); }catch(e){}
+      doc.setFont('helvetica','bold'); doc.setFontSize(8.4); setC(REDD);
+      const num = 'Photo ' + (i+1);
+      doc.text(num, px+8, cy + imgH + 14);
+      const nw = doc.getTextWidth(num + '  ');
+      if(ph.legende && ph.legende.trim()){
+        doc.setFont('helvetica','normal'); setC(INK);
+        const l1 = doc.splitTextToSize(ph.legende.trim(), colW - 16 - nw);
+        doc.text(l1[0], px + 8 + nw, cy + imgH + 14);
+        if(l1.length > 1){
+          const rest = ph.legende.trim().slice(l1[0].length).trim();
+          const l2 = doc.splitTextToSize(rest, colW - 16);
+          doc.text(l2[0] + (l2.length>1 ? '…' : ''), px + 8, cy + imgH + 25);
+        }
+      }
+      if(col === 1) rowTop += cellH + 12;
+      count++;
+    });
+  }
+
   /* ---- Pagination ---- */
   const n = doc.getNumberOfPages();
   if(n > 1){
@@ -1031,12 +1238,11 @@ async function generatePDF(){
     }
   }
 
-  const safe = (s)=>s.trim().replace(/[\\/:*?"<>|]/g,'-').replace(/\s+/g,'_').slice(0,40);
-  const fname = 'Causerie_Securite_' + (safe(state.meta.chantier) || 'chantier') + '_' + (state.meta.date||'').replace(/-/g,'') + '.pdf';
+  const clean = (t)=>(t||'').replace(/[\\/:*?"<>|]/g,' ').replace(/\s+/g,' ').trim().slice(0,60);
+  const fname = [clean(state.meta.chantier) || 'Chantier', clean(state.meta.entreprise) || 'Entreprise'].join(' - ') + '.pdf';
 
   pushHisto('chantiers', state.meta.chantier);
   pushHisto('animateurs', state.meta.anim_nom);
-  participants.forEach(p=>{ if(!ENTREPRISES.includes(p.entreprise.trim())) pushHisto('entreprises', p.entreprise); });
 
   return { doc, fname };
 }
@@ -1060,7 +1266,8 @@ function missingPoints(){
   const p = progressParts();
   const out = [];
   if(!p.chantier) out.push('Chantier / Affaire non renseigné');
-  if(!p.animateur) out.push('Nom de l’animateur non renseigné');
+  if(!state.meta.entreprise.trim()) out.push('Entreprise non sélectionnée');
+  if(!p.animateur) out.push('Animateur non sélectionné');
   const nc = CONSIGNES.length - p.consignes;
   if(nc) out.push(nc + ' consigne' + (nc>1?'s':'') + ' non cochée' + (nc>1?'s':''));
   if(!p.participant) out.push('Aucun participant signé');

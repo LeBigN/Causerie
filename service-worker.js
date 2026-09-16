@@ -1,13 +1,15 @@
-const CACHE_NAME = 'causerie-securite-v1';
+const CACHE_NAME = 'causerie-v3';
 const ASSETS = [
   './',
   './index.html',
-  './manifest.json',
+  './manifest.json?v=2',
   './vendor/jspdf.umd.min.js',
-  './icons/icon-192.png',
-  './icons/icon-512.png',
-  './icons/icon-192-maskable.png',
-  './icons/icon-512-maskable.png',
+  './apple-touch-icon.png?v=2',
+  './favicon-32.png?v=2',
+  './icon-192.png?v=2',
+  './icon-512.png?v=2',
+  './icon-192-maskable.png?v=2',
+  './icon-512-maskable.png?v=2',
 ];
 
 self.addEventListener('install', (event) => {
