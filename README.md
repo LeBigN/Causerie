@@ -8,7 +8,7 @@ officiel A4 (même charte que les autres apps LOXAM Module).
 
 - `index.html` — l'appli (seul fichier à modifier pour changer le contenu)
 - `manifest.json` — nom, icône, couleurs de l'app installée
-- `service-worker.js` — fonctionnement hors-ligne (cache `causerie-v5`)
+- `service-worker.js` — fonctionnement hors-ligne (cache `causerie-v6`)
 - `apple-touch-icon.png`, `icon-192.png`, `icon-512.png`, `icon-*-maskable.png`, `favicon-32.png`
   — icônes de l'app, À LA RACINE du dépôt (à côté de index.html)
 - `jspdf.umd.min.js` — génération de PDF embarquée en local (repli CDN si absent)
@@ -39,7 +39,7 @@ Vérification rapide : ouvrir `<URL>/apple-touch-icon.png` doit afficher le casq
 - Pavés de signature verrouillés : appuyer sur « Appuyer pour signer » avant de tracer
 - Aucune consigne cochée par défaut ; la date du jour est pré-remplie (modifiable)
 - Menus déroulants : animateur (SCOTTO Nicolas, LAOUAR Hilel, Autre…), fonction (RA,
-  Conducteur de travaux, Autre…) et entreprises (LOXAM Module, CRPS, TCPP, TERMICLIM,
+  Conducteur de travaux, Autre…) et entreprises (CRPS, TCPP, TERMICLIM,
   CC BAT, EMS, JM CARTIER, SPNI, HR LEVAGE, MLTM, TPS FLAUTO, CARRARA, MEDIACO,
   APB TPS, LVTB, DONATI, MOKRANE, Intérim, Autre…)
 - Plusieurs entreprises possibles sur une même fiche (« Ajouter une entreprise »)
@@ -53,5 +53,5 @@ Vérification rapide : ouvrir `<URL>/apple-touch-icon.png` doit afficher le casq
 
 ## Mise à jour
 
-Remplacer `index.html`, puis passer `CACHE_NAME` à `causerie-v6`
-(v7, v8…) dans `service-worker.js`, et `APP_VERSION` dans `index.html`.
+Remplacer `index.html`, puis passer `CACHE_NAME` à `causerie-v7`
+(v8, v9…) dans `service-worker.js`, et `APP_VERSION` dans `index.html`.

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'causerie-v5';
+const CACHE_NAME = 'causerie-v6';
 const ASSETS = [
   './',
   './index.html',

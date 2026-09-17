@@ -254,7 +254,7 @@ footer.legal-footer{
 </div>
 
 <script>
-const APP_VERSION = 'v5';
+const APP_VERSION = 'v6';
 
 /* ---------- ICÔNES SVG (style Lucide, minimalistes, currentColor) ---------- */
 function icon(name, size){
@@ -333,7 +333,7 @@ const LEGAL = 'LOXAM MODULE – S.A.S.U. CAPITAL DE 487 500 € – SIÈGE SOCIA
 const FONCTIONS = ['RA','Conducteur de travaux'];
 const CONDUCTEURS = ['SCOTTO Nicolas','LAOUAR Hilel'];
 const SOUS_TRAITANTS = ['CRPS','TCPP','TERMICLIM','CC BAT','EMS','JM CARTIER','SPNI','HR LEVAGE','MLTM','TPS FLAUTO','CARRARA','MEDIACO','APB TPS','LVTB','DONATI','MOKRANE'];
-const ENTREPRISES = ['LOXAM Module', ...SOUS_TRAITANTS];   // + « Intérim » et « Autre… » (saisie libre)
+const ENTREPRISES = [...SOUS_TRAITANTS];   // + « Intérim » et « Autre… » (saisie libre)
 const AUTRE = '__autre__', INTERIM = '__interim__';
 
 /* Menu déroulant (même principe que Loxcheck) */
