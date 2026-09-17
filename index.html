@@ -254,7 +254,7 @@ footer.legal-footer{
 </div>
 
 <script>
-const APP_VERSION = 'v6';
+const APP_VERSION = 'v7';
 
 /* ---------- ICÔNES SVG (style Lucide, minimalistes, currentColor) ---------- */
 function icon(name, size){
@@ -1302,8 +1302,10 @@ async function deliverPDF(doc, fname){
   try{
     const blob = doc.output('blob');
     const file = new File([blob], fname, {type:'application/pdf'});
+    // Uniquement le fichier : ajouter title/text/url fait apparaître un fichier
+    // texte supplémentaire à côté du PDF lors de l'enregistrement (iOS).
     if(navigator.canShare && navigator.canShare({files:[file]})){
-      await navigator.share({files:[file], title:fname});
+      await navigator.share({files:[file]});
       return;
     }
   }catch(e){
