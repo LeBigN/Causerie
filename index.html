@@ -246,7 +246,7 @@ footer.legal-footer{
 </div>
 
 <script>
-const APP_VERSION = 'v3';
+const APP_VERSION = 'v4';
 
 /* ---------- ICÔNES SVG (style Lucide, minimalistes, currentColor) ---------- */
 function icon(name, size){
@@ -861,7 +861,7 @@ function resetFiche(){
 
 document.getElementById('resetBtn').addEventListener('click', resetFiche);
 document.getElementById('resetBtn').innerHTML = icon('trash',18);
-const PDF_LABEL = icon('file',16) + '<span>Générer le PDF officiel</span>';
+const PDF_LABEL = icon('file',16) + '<span>Générer le PDF</span>';
 document.getElementById('pdfBtn').innerHTML = PDF_LABEL;
 
 /* ---------- GÉNÉRATION PDF (charte identique aux apps LOXAM Module) ---------- */
