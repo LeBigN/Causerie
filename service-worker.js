@@ -1,9 +1,9 @@
-const CACHE_NAME = 'causerie-v4';
+const CACHE_NAME = 'causerie-v5';
 const ASSETS = [
   './',
   './index.html',
   './manifest.json?v=2',
-  './vendor/jspdf.umd.min.js',
+  './jspdf.umd.min.js',
   './apple-touch-icon.png?v=2',
   './favicon-32.png?v=2',
   './icon-192.png?v=2',

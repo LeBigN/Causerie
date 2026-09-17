@@ -16,7 +16,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png?v=2">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=2">
 <link rel="apple-touch-icon-precomposed" href="apple-touch-icon.png?v=2">
-<script src="vendor/jspdf.umd.min.js"></script>
+<script src="jspdf.umd.min.js"></script>
 <style>
 :root{
   --red:#C8102E;
@@ -72,7 +72,10 @@ section.card p.hint{font-size:12px; color:var(--sub); margin:0 0 12px; line-heig
 .doc-title{font-size:16px; font-weight:800; color:var(--ink); margin:0 0 2px; line-height:1.3;}
 .doc-sub{font-size:12px; color:var(--sub); margin:0 0 14px; font-weight:600;}
 
-.field{margin-bottom:12px;}
+.field{margin-bottom:12px; display:flex; flex-direction:column;}
+.field > label{flex:0 0 auto;}
+.field > input, .field > select, .field > textarea{margin-top:auto;}
+.grid2{align-items:stretch;}
 .field label{display:block; font-size:12.5px; font-weight:600; color:var(--sub); margin-bottom:4px;}
 .field input[type=text], .field input[type=date], .field select, .field textarea{
   width:100%; min-width:0; max-width:100%; border:1px solid var(--line); border-radius:9px; padding:10px 11px;
@@ -129,6 +132,11 @@ input:focus, textarea:focus, select:focus{ outline:2px solid rgba(200,16,46,.35)
 .sig-clear{margin-top:6px; background:#EEF0F3; color:var(--red-dark); border:none; border-radius:8px; padding:7px 10px; font-size:12px; font-weight:600; display:inline-flex; align-items:center; gap:6px;}
 
 /* Rappel */
+.add-ent{
+  width:100%; height:42px; border-radius:10px; border:1.5px dashed #CBD2DB; background:#F1F3F6;
+  color:#4A5568; font-size:13.5px; font-weight:700; display:flex; align-items:center; justify-content:center; gap:7px; margin:-4px 0 14px;
+}
+.ent-rm{border:none; background:none; color:var(--nok); padding:0 0 0 8px; vertical-align:-2px;}
 .photo-actions{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px;}
 .photo-actions button{
   height:48px; border-radius:11px; font-size:14px; font-weight:700; display:flex; align-items:center; justify-content:center; gap:8px;
@@ -246,7 +254,7 @@ footer.legal-footer{
 </div>
 
 <script>
-const APP_VERSION = 'v4';
+const APP_VERSION = 'v5';
 
 /* ---------- ICÔNES SVG (style Lucide, minimalistes, currentColor) ---------- */
 function icon(name, size){
@@ -264,6 +272,7 @@ function icon(name, size){
     users:   '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
     userPlus:'<path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/>',
     alert:   '<path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
+    plus:    '<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
     edit:    '<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>',
     camera:  '<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>',
     image:   '<rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>',
@@ -321,9 +330,9 @@ const RAPPEL_LEAD = 'Rappel LOXAM MODULE : ';
 const RAPPEL_TEXT = 'chaque intervenant doit respecter le PPSPS, les consignes du site client et signaler immédiatement tout incident ou presque-accident.';
 const LEGAL = 'LOXAM MODULE – S.A.S.U. CAPITAL DE 487 500 € – SIÈGE SOCIAL : 276, RUE NICOLAS COATANLEM – 56850 CAUDAN – R.C.S. LORIENT B 433 911 948 – N° T.V.A : FR27 433 911 948 – NAF 7732Z';
 
-const FONCTIONS = ['Conducteur de travaux','Chef de chantier','Chef d’équipe','Chargé d’affaires','Responsable QSE'];
+const FONCTIONS = ['RA','Conducteur de travaux'];
 const CONDUCTEURS = ['SCOTTO Nicolas','LAOUAR Hilel'];
-const SOUS_TRAITANTS = ['CRPS','TCPP','TERMICLIM','CC BAT','EMS','JM CARTIER'];
+const SOUS_TRAITANTS = ['CRPS','TCPP','TERMICLIM','CC BAT','EMS','JM CARTIER','SPNI','HR LEVAGE','MLTM','TPS FLAUTO','CARRARA','MEDIACO','APB TPS','LVTB','DONATI','MOKRANE'];
 const ENTREPRISES = ['LOXAM Module', ...SOUS_TRAITANTS];   // + « Intérim » et « Autre… » (saisie libre)
 const AUTRE = '__autre__', INTERIM = '__interim__';
 
@@ -352,15 +361,30 @@ function resolveEntreprise(choice, precise){
 const STORAGE_KEY   = 'causerie_secu_draft_v1';
 const HISTO_KEY     = 'causerie_secu_histo_v1';   // chantiers / animateurs / entreprises récents
 
+function newEntreprise(){
+  return { id: Date.now().toString(36)+Math.random().toString(36).slice(2,6), choice:'', precise:'', nom:'' };
+}
+/* Liste des entreprises retenues sur la fiche, dans l'ordre de saisie */
+function entreprisesFiche(){
+  return (state.meta.entreprises||[]).map(e=>e.nom).filter(n=>n && n.trim());
+}
+function entreprisesTexte(sep){
+  return entreprisesFiche().join(sep || ' / ');
+}
+
 function newParticipant(){
   const base = { id: Date.now().toString(36) + Math.random().toString(36).slice(2,6), nom:'', ent_choice:'', ent_precise:'', entreprise:'', sig:'' };
-  // Un nouvel intervenant reprend par défaut l'entreprise de la fiche (modifiable)
-  try{ if(state && state.meta && state.meta.ent_choice){ base.ent_choice = state.meta.ent_choice; base.ent_precise = state.meta.ent_precise; base.entreprise = state.meta.entreprise; } }catch(e){}
+  // Une seule entreprise sur la fiche : l'intervenant la reprend par défaut (modifiable)
+  try{
+    const list = (state && state.meta && state.meta.entreprises) || [];
+    const named = list.filter(e=>e.nom && e.nom.trim());
+    if(named.length === 1){ base.ent_choice = named[0].choice; base.ent_precise = named[0].precise; base.entreprise = named[0].nom; }
+  }catch(e){}
   return base;
 }
 function initialState(){
   return {
-    meta:{ chantier:'', date:'', ent_choice:'', ent_precise:'', entreprise:'', anim_choice:'', anim_nom:'', anim_fonction:'' },
+    meta:{ chantier:'', date:'', entreprises:[ newEntreprise() ], anim_choice:'', anim_nom:'', anim_fonction:'', fonc_choice:'' },
     consignes:{},          // index -> true (aucune case cochée par défaut)
     remarques:'',
     photos:[],             // [{id, src (JPEG compressé), w, h, legende}]
@@ -396,8 +420,6 @@ function datalist(id, values){
 function renderInfoSection(){
   const h = loadHisto();
   const c = el('section',{class:'card', id:'sec-info'});
-  c.append(el('p',{class:'doc-title'}, 'Fiche de causerie sécurité – Démarrage de chantier'));
-  c.append(el('p',{class:'doc-sub'}, 'LOXAM MODULE'));
   c.append(el('h2', iconNode('building',16), el('span','Informations du chantier')));
 
   c.append(el('div',{class:'field'},
@@ -410,35 +432,60 @@ function renderInfoSection(){
     el('label',{for:'f_date'},'Date'),
     el('input',{type:'date', id:'f_date', value:state.meta.date, oninput:(e)=>state.meta.date=e.target.value})));
 
-  // Entreprise concernée (sert aussi au nom du PDF)
+  // Entreprises présentes sur le chantier (servent aussi au nom du PDF)
   const m = state.meta;
-  const entPrecise = (m.ent_choice === AUTRE || m.ent_choice === INTERIM)
-    ? el('input',{type:'text', style:'margin-top:8px', placeholder: m.ent_choice===INTERIM ? 'Nom de l’agence d’intérim' : 'Nom de l’entreprise', autocomplete:'off',
-        value:m.ent_precise, oninput:(e)=>{ m.ent_precise=e.target.value; m.entreprise=resolveEntreprise(m.ent_choice, m.ent_precise); }})
-    : null;
-  c.append(selectField('Entreprise / Sous-traitant', entrepriseOptions(), m.ent_choice, (v)=>{
-    m.ent_choice = v; m.entreprise = resolveEntreprise(v, m.ent_precise);
-    // Propage aux intervenants encore vierges
-    state.participants.forEach(p=>{ if(!p.nom.trim() && !p.sig){ p.ent_choice=v; p.ent_precise=m.ent_precise; p.entreprise=m.entreprise; } });
-    renderAll(); saveDraft(true);
-  }, entPrecise));
+  if(!m.entreprises.length) m.entreprises.push(newEntreprise());
+  m.entreprises.forEach((ent, idx)=>{
+    const precise = (ent.choice === AUTRE || ent.choice === INTERIM)
+      ? el('input',{type:'text', style:'margin-top:8px', placeholder: ent.choice===INTERIM ? 'Nom de l’agence d’intérim' : 'Nom de l’entreprise', autocomplete:'off',
+          value:ent.precise, oninput:(e)=>{ ent.precise=e.target.value; ent.nom=resolveEntreprise(ent.choice, ent.precise); }})
+      : null;
+    const label = m.entreprises.length > 1 ? 'Entreprise ' + (idx+1) : 'Entreprise / Sous-traitant';
+    const f = selectField(label, entrepriseOptions(), ent.choice, (v)=>{
+      ent.choice = v; ent.nom = resolveEntreprise(v, ent.precise);
+      // Propage aux intervenants encore vierges quand il n'y a qu'une entreprise
+      const named = m.entreprises.filter(x=>x.nom && x.nom.trim());
+      if(named.length === 1){
+        state.participants.forEach(p=>{ if(!p.nom.trim() && !p.sig){ p.ent_choice=named[0].choice; p.ent_precise=named[0].precise; p.entreprise=named[0].nom; } });
+      }
+      renderAll(); saveDraft(true);
+    }, precise);
+    if(m.entreprises.length > 1){
+      const rm = el('button',{type:'button', class:'ent-rm', 'aria-label':'Retirer cette entreprise', onclick:()=>{
+        m.entreprises = m.entreprises.filter(x=>x.id!==ent.id);
+        renderAll(); saveDraft(true);
+      }});
+      rm.innerHTML = icon('trash',15);
+      f.querySelector('label').append(rm);
+    }
+    c.append(f);
+  });
+  const addEnt = el('button',{type:'button', class:'add-ent', onclick:()=>{
+    m.entreprises.push(newEntreprise()); renderAll(); saveDraft(true);
+  }});
+  addEnt.innerHTML = icon('plus',15) + '<span>Ajouter une entreprise</span>';
+  c.append(addEnt);
 
   const g = el('div',{class:'grid2 stack-sm'});
   const animAutre = m.anim_choice === AUTRE
     ? el('input',{type:'text', style:'margin-top:8px', placeholder:'Prénom NOM', autocomplete:'off',
         value:m.anim_nom, oninput:(e)=>{ m.anim_nom=e.target.value; updateProgress(); }})
     : null;
-  g.append(selectField('Animateur (conducteur de travaux)', [...CONDUCTEURS.map(v=>({v, t:v})), {v:AUTRE, t:'Autre…'}], m.anim_choice, (v)=>{
+  g.append(selectField('Animateur', [...CONDUCTEURS.map(v=>({v, t:v})), {v:AUTRE, t:'Autre…'}], m.anim_choice, (v)=>{
     m.anim_choice = v;
     m.anim_nom = (v === AUTRE || !v) ? '' : v;
-    if(CONDUCTEURS.includes(v)) m.anim_fonction = 'Conducteur de travaux';
+    if(CONDUCTEURS.includes(v) && !m.fonc_choice){ m.fonc_choice = 'Conducteur de travaux'; m.anim_fonction = 'Conducteur de travaux'; }
     renderAll(); saveDraft(true);
   }, animAutre));
-  g.append(el('div',{class:'field'},
-    el('label',{for:'f_fonction'},'Fonction'),
-    el('input',{type:'text', id:'f_fonction', list:'dl_fonctions', placeholder:'Ex : Conducteur de travaux', autocomplete:'off',
-      value:m.anim_fonction, oninput:(e)=>m.anim_fonction=e.target.value}),
-    datalist('dl_fonctions', FONCTIONS)));
+  const foncAutre = m.fonc_choice === AUTRE
+    ? el('input',{type:'text', style:'margin-top:8px', id:'f_fonction', placeholder:'Préciser la fonction', autocomplete:'off',
+        value:m.anim_fonction, oninput:(e)=>m.anim_fonction=e.target.value})
+    : null;
+  g.append(selectField('Fonction', [...FONCTIONS.map(v=>({v, t:v})), {v:AUTRE, t:'Autre…'}], m.fonc_choice, (v)=>{
+    m.fonc_choice = v;
+    m.anim_fonction = (v === AUTRE || !v) ? '' : v;
+    renderAll(); saveDraft(true);
+  }, foncAutre));
   c.append(g);
   return c;
 }
@@ -446,7 +493,7 @@ function renderInfoSection(){
 function renderConsignesSection(){
   const c = el('section',{class:'card', id:'sec-consignes'});
   const done = CONSIGNES.filter((_,i)=>state.consignes[i]).length;
-  c.append(el('h2', iconNode('shieldCheck',16), el('span','1. Rappel des consignes du jour'),
+  c.append(el('h2', iconNode('shieldCheck',16), el('span','1. Rappel des consignes'),
     el('span',{class:'chapter-progress'+(done===CONSIGNES.length?' done':'')}, done+'/'+CONSIGNES.length)));
   c.append(el('p',{class:'hint'}, 'Cocher chaque point une fois abordé avec l’équipe.'));
   CONSIGNES.forEach((cs, i)=>{
@@ -753,9 +800,7 @@ function renderAll(){
   main.append(renderParticipantsSection());
   main.append(renderAnimSigSection());
   main.append(renderRappel());
-  const f = el('footer',{class:'legal-footer'}, LEGAL);
-  f.append(el('span',{class:'app-version'}, 'Causerie ' + APP_VERSION));
-  main.append(f);
+  main.append(el('footer',{class:'legal-footer'}, LEGAL));
   document.querySelectorAll('canvas[data-sig]').forEach(setupSig);
   window.scrollTo(0, scrollY);
   updateProgress();
@@ -834,6 +879,12 @@ function loadDraft(){
     };
     if(!state.participants.length) state.participants.push(newParticipant());
     if(!state.meta.anim_choice && state.meta.anim_nom){ state.meta.anim_choice = CONDUCTEURS.includes(state.meta.anim_nom) ? state.meta.anim_nom : AUTRE; }
+    if(!state.meta.fonc_choice && state.meta.anim_fonction){ state.meta.fonc_choice = FONCTIONS.includes(state.meta.anim_fonction) ? state.meta.anim_fonction : AUTRE; }
+    if(!Array.isArray(state.meta.entreprises) || !state.meta.entreprises.length){
+      const e = newEntreprise();
+      if(d.meta && d.meta.entreprise){ e.choice = d.meta.ent_choice || AUTRE; e.precise = d.meta.ent_precise || ''; e.nom = d.meta.entreprise; }
+      state.meta.entreprises = [e];
+    }
   }catch(e){}
 }
 function todayISO(){
@@ -869,7 +920,7 @@ function loadJsPDF(){
   return new Promise((resolve, reject)=>{
     if(window.jspdf){ resolve(); return; }
     const local = document.createElement('script');
-    local.src = 'vendor/jspdf.umd.min.js';
+    local.src = 'jspdf.umd.min.js';
     local.onload = ()=> resolve();
     local.onerror = ()=>{
       const cdn = document.createElement('script');
@@ -1012,7 +1063,7 @@ async function generatePDF(){
   /* ---- Cartouche : Chantier / Date / Animateur ---- */
   const cols = [
     {label:'CHANTIER / AFFAIRE', w:CW*0.30, val:[state.meta.chantier.trim() || ' ']},
-    {label:'ENTREPRISE', w:CW*0.22, val:[state.meta.entreprise.trim() || ' ']},
+    {label:'ENTREPRISE(S)', w:CW*0.22, val:[entreprisesTexte(' / ') || ' ']},
     {label:'DATE', w:CW*0.16, val:[frDate(state.meta.date) || '__ / __ / ____'], nowrap:true},
     {label:'ANIMATEUR (NOM / FONCTION)', w:CW*0.32, val:[state.meta.anim_nom.trim() || ' ', state.meta.anim_fonction.trim()]}
   ];
@@ -1049,7 +1100,7 @@ async function generatePDF(){
   y += infoH + 12;
 
   /* ---- 1. Consignes ---- */
-  y = band('1. RAPPEL DES CONSIGNES DU JOUR', y) + 8;
+  y = band('1. RAPPEL DES CONSIGNES', y) + 8;
   CONSIGNES.forEach((cs, i)=>{
     const lines = leadLines(cs.lead, cs.rest, CW-22, 9.3);
     const h = Math.max(17, lines.length*11.2 + 5);
@@ -1239,7 +1290,7 @@ async function generatePDF(){
   }
 
   const clean = (t)=>(t||'').replace(/[\\/:*?"<>|]/g,' ').replace(/\s+/g,' ').trim().slice(0,60);
-  const fname = [clean(state.meta.chantier) || 'Chantier', clean(state.meta.entreprise) || 'Entreprise'].join(' - ') + '.pdf';
+  const fname = [clean(state.meta.chantier) || 'Chantier', clean(entreprisesTexte(' + ')) || 'Entreprise'].join(' - ') + '.pdf';
 
   pushHisto('chantiers', state.meta.chantier);
   pushHisto('animateurs', state.meta.anim_nom);
@@ -1266,7 +1317,7 @@ function missingPoints(){
   const p = progressParts();
   const out = [];
   if(!p.chantier) out.push('Chantier / Affaire non renseigné');
-  if(!state.meta.entreprise.trim()) out.push('Entreprise non sélectionnée');
+  if(!entreprisesFiche().length) out.push('Entreprise non sélectionnée');
   if(!p.animateur) out.push('Animateur non sélectionné');
   const nc = CONSIGNES.length - p.consignes;
   if(nc) out.push(nc + ' consigne' + (nc>1?'s':'') + ' non cochée' + (nc>1?'s':''));
